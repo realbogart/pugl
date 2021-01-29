@@ -1015,15 +1015,6 @@ puglSetAspectRatio(PuglView* view, int minX, int minY, int maxX, int maxY);
 */
 
 /**
-   Set if the window accept drag and drop of files.
-
-   This must be called after puglRealize()
-*/
-PUGL_API
-PuglStatus
-puglSetWindowAcceptDropFiles(PuglView* view, int accept);
-
-/**
    Set the title of the window.
 
    This only makes sense for non-embedded views that will have a corresponding

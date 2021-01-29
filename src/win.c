@@ -198,7 +198,7 @@ puglRealize(PuglView* view)
   }
 
   if (view->hints[PUGL_ACCEPT_DROP_FILES] != PUGL_DONT_CARE) {
-    puglSetWindowAcceptDropFiles(view, view->hints[PUGL_ACCEPT_DROP_FILES]);
+    DragAcceptFiles(view->impl->hwnd, view->hints[PUGL_ACCEPT_DROP_FILES]);
   }
 
   if (view->title) {
@@ -963,18 +963,6 @@ PuglNativeView
 puglGetNativeWindow(PuglView* view)
 {
   return (PuglNativeView)view->impl->hwnd;
-}
-
-PuglStatus
-puglSetWindowAcceptDropFiles(PuglView* view, int accept)
-{
-  if (!view->impl->hwnd) {
-    return PUGL_FAILURE;
-  }
-
-  DragAcceptFiles(view->impl->hwnd, accept);
-
-  return PUGL_SUCCESS;
 }
 
 PuglStatus
