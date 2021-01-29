@@ -188,6 +188,7 @@ typedef enum {
   PUGL_SCROLL,         ///< Scrolled, a #PuglEventScroll
   PUGL_CLIENT,         ///< Custom client message, a #PuglEventClient
   PUGL_TIMER,          ///< Timer triggered, a #PuglEventTimer
+  PUGL_DROPFILE,       ///< A file was dropped on the view, a #PuglEventDropFile
   PUGL_LOOP_ENTER,     ///< Recursive loop entered, a #PuglEventLoopEnter
   PUGL_LOOP_LEAVE,     ///< Recursive loop left, a #PuglEventLoopLeave
 
@@ -505,6 +506,20 @@ typedef struct {
 } PuglEventTimer;
 
 /**
+   Drop file event.
+
+   This event is sent whenever a file is dropped on the view.
+*/
+typedef struct {
+  PuglEventType  type;        ///< #PUGL_DROPFILE
+  PuglEventFlags flags;       ///< Bitwise OR of #PuglEventFlag values
+  const char*    path;        ///< UTF-8 string with file path
+  uint32_t       path_length; ///< Length of file path in bytes
+  double         x;           ///< View-relative X coordinate
+  double         y;           ///< View-relative Y coordinate
+} PuglEventDropFile;
+
+/**
    Recursive loop enter event.
 
    This event is sent when the window system enters a recursive loop.  The main
@@ -561,6 +576,7 @@ typedef union {
   PuglEventFocus     focus;     ///< #PUGL_FOCUS_IN, #PUGL_FOCUS_OUT
   PuglEventClient    client;    ///< #PUGL_CLIENT
   PuglEventTimer     timer;     ///< #PUGL_TIMER
+  PuglEventDropFile  dropfile;  ///< #PUGL_DROPFILE
 } PuglEvent;
 
 /**
@@ -797,6 +813,7 @@ typedef enum {
   PUGL_RESIZABLE,             ///< True if view should be resizable
   PUGL_IGNORE_KEY_REPEAT,     ///< True if key repeat events are ignored
   PUGL_REFRESH_RATE,          ///< Refresh rate in Hz
+  PUGL_ACCEPT_DROP_FILES,     ///< True if view accepts drag and drop of files
 
   PUGL_NUM_VIEW_HINTS
 } PuglViewHint;
@@ -996,6 +1013,15 @@ puglSetAspectRatio(PuglView* view, int minX, int minY, int maxX, int maxY);
    Functions to control the top-level window of a view.
    @{
 */
+
+/**
+   Set if the window accept drag and drop of files.
+
+   This must be called after puglRealize()
+*/
+PUGL_API
+PuglStatus
+puglSetWindowAcceptDropFiles(PuglView* view, int accept);
 
 /**
    Set the title of the window.

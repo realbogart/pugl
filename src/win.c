@@ -197,6 +197,10 @@ puglRealize(PuglView* view)
     return st;
   }
 
+  if (view->hints[PUGL_ACCEPT_DROP_FILES] != PUGL_DONT_CARE) {
+    puglSetWindowAcceptDropFiles(view, view->hints[PUGL_ACCEPT_DROP_FILES]);
+  }
+
   if (view->title) {
     puglSetWindowTitle(view, view->title);
   }
@@ -592,6 +596,32 @@ handleMessage(PuglView* view, UINT message, WPARAM wParam, LPARAM lParam)
       return TRUE;
     }
     break;
+  case WM_DROPFILES:
+  {
+    DragQueryPoint((HANDLE)wParam, &pt);
+
+    PuglEvent ev = { {PUGL_DROPFILE, 0} };
+    ev.dropfile.x = pt.x;
+    ev.dropfile.y = pt.y;
+
+    UINT fileCount = DragQueryFile((HANDLE)wParam, 0xFFFFFFFF, (LPSTR)NULL, 0);
+    for (UINT i = 0; i < fileCount; i++) {
+      UINT fileNameSize = DragQueryFile((HANDLE)wParam, i, (LPSTR)NULL, 0) + 1;
+
+      LPWSTR wbuffer = (LPWSTR)malloc(sizeof(WCHAR) * fileNameSize);
+      DragQueryFile((HANDLE)wParam, i, wbuffer, fileNameSize);
+
+      size_t utf8Size = 0;
+      ev.dropfile.path = puglWideCharToUtf8(wbuffer, &utf8Size);
+      ev.dropfile.path_length = utf8Size;
+      free(wbuffer);
+
+      puglDispatchEvent(view, &ev);
+
+      free(ev.dropfile.path);
+    }
+  }
+    break;
   case WM_ENTERSIZEMOVE:
   case WM_ENTERMENULOOP:
     puglDispatchSimpleEvent(view, PUGL_LOOP_ENTER);
@@ -933,6 +963,18 @@ PuglNativeView
 puglGetNativeWindow(PuglView* view)
 {
   return (PuglNativeView)view->impl->hwnd;
+}
+
+PuglStatus
+puglSetWindowAcceptDropFiles(PuglView* view, int accept)
+{
+  if (!view->impl->hwnd) {
+    return PUGL_FAILURE;
+  }
+
+  DragAcceptFiles(view->impl->hwnd, accept);
+
+  return PUGL_SUCCESS;
 }
 
 PuglStatus
