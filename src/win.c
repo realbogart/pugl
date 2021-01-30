@@ -598,18 +598,18 @@ handleMessage(PuglView* view, UINT message, WPARAM wParam, LPARAM lParam)
     break;
   case WM_DROPFILES:
   {
-    DragQueryPoint((HANDLE)wParam, &pt);
+    DragQueryPoint((HDROP)wParam, &pt);
 
     PuglEvent ev = { {PUGL_DROPFILE, 0} };
     ev.dropfile.x = pt.x;
     ev.dropfile.y = pt.y;
 
-    UINT fileCount = DragQueryFile((HANDLE)wParam, 0xFFFFFFFF, (LPSTR)NULL, 0);
+    UINT fileCount = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, (LPSTR)NULL, 0);
     for (UINT i = 0; i < fileCount; i++) {
-      UINT fileNameSize = DragQueryFile((HANDLE)wParam, i, (LPSTR)NULL, 0) + 1;
+      UINT fileNameSize = DragQueryFile((HDROP)wParam, i, (LPSTR)NULL, 0) + 1;
 
       LPWSTR wbuffer = (LPWSTR)malloc(sizeof(WCHAR) * fileNameSize);
-      DragQueryFile((HANDLE)wParam, i, wbuffer, fileNameSize);
+      DragQueryFile((HDROP)wParam, i, wbuffer, fileNameSize);
 
       size_t utf8Size = 0;
       ev.dropfile.path = puglWideCharToUtf8(wbuffer, &utf8Size);
@@ -619,6 +619,7 @@ handleMessage(PuglView* view, UINT message, WPARAM wParam, LPARAM lParam)
       puglDispatchEvent(view, &ev);
 
       free(ev.dropfile.path);
+      DragFinish((HDROP)wParam);
     }
   }
     break;
